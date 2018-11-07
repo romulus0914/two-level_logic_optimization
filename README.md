@@ -1,3 +1,3 @@
 # Two Level Logic Optimization
 
-## two level logic optimization implemented in C and C++
+two level logic optimization implemented in C and C++
