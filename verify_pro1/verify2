@@ -1,0 +1,85 @@
+#!/usr/bin/perl
+
+$inputname = $ARGV[0];
+$outputname = $ARGV[0];
+$outputname =~ s/$/.blif/; 
+$finename = $ARGV[0];
+$finename =~ s/.*\///;
+@abc_list = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z");
+
+open FP, "<$inputname";
+open OUT, ">$outputname";
+
+#print "inputname=$inputname\n";
+#print "outputname=$outputname\n";
+ 
+$variable_count = <FP>;
+$variable_count = 6 if ($inputname eq "case00.out");
+$variable_count = 6 if ($inputname eq "case01.out");
+$variable_count = 8 if ($inputname eq "case02.out");
+$variable_count = 10 if ($inputname eq "case03.out");
+$variable_count = 11 if ($inputname eq "case04.out");
+$variable_count = 12 if ($inputname eq "case05.out");
+$variable_count = 13 if ($inputname eq "case06.out");
+$variable_count = 14 if ($inputname eq "case07.out");
+$variable_count = 20 if ($inputname eq "case08.out");
+$variable_count = 23 if ($inputname eq "case09.out");
+$variable_count = 26 if ($inputname eq "case10.out");
+#print "original variable=$variable\n original clause=$clause\n";
+
+print OUT ".model $finename\n";
+print OUT ".inputs";
+for ($i=0;$i<$variable_count;$i++){
+	print OUT " $abc_list[$i]";
+}
+print OUT "\n";
+$term_count = <FP>;
+print OUT ".outputs F_sop\n";
+#print "variable_count=$variable_count\n";
+#print "term_count=$term_count\n\n";
+
+$internal_line=1;
+while($buffer=<FP>){
+	chomp($buffer);
+	@token = split "",$buffer;
+	if(length($buffer)<$variable_count){
+		last;
+	}
+	@value="";
+	
+	print OUT ".names";
+	$internal_variable=0;
+	foreach $w(@token){
+		if($w eq "0"){
+			push @value,"0";
+		}elsif($w eq "1"){
+			 push @value,"1";
+		}else{
+			$internal_variable++;
+			next;
+		}
+		print OUT " $abc_list[$internal_variable]";
+		$internal_variable++;
+	}
+	print OUT " XD$internal_line\n";
+	$internal_line++;
+	foreach $v(@value){
+		print OUT $v;
+	}
+	print OUT " 1\n";
+}
+#print "total number of terms +1 = $internal_line\n";
+print OUT ".names";
+for ($x=1;$x<$internal_line;$x++){
+	print OUT " XD$x";
+}
+print OUT " F_sop\n";
+for ($x=1;$x<$internal_line;$x++){
+        print OUT "0";
+}
+print OUT " 0\n";
+print OUT ".end";
+
+close OUT;
+close FP;
+
